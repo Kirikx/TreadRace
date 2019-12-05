@@ -4,7 +4,8 @@ import java.util.concurrent.CountDownLatch;
 
 public class Car implements Runnable {
     private static int CARS_COUNT;
-    private CountDownLatch start;
+    private CountDownLatch start, finish;
+    private static boolean win = false;
     static {
         CARS_COUNT = 0;
     }
@@ -17,8 +18,15 @@ public class Car implements Runnable {
     public int getSpeed() {
         return speed;
     }
-    public Car(Race race, int speed, CountDownLatch start) {
+    private static synchronized void winner (Car c) {
+        if (!win) {
+            System.out.println(c.name + " WIN!");
+            win = true;
+        }
+    }
+    public Car(Race race, int speed, CountDownLatch start, CountDownLatch finish) {
         this.start = start;
+        this.finish = finish;
         this.race = race;
         this.speed = speed;
         CARS_COUNT++;
@@ -38,5 +46,7 @@ public class Car implements Runnable {
         for (int i = 0; i < race.getStages().size(); i++) {
             race.getStages().get(i).go(this);
         }
+        winner(this);
+        finish.countDown();
     }
 }
